@@ -9,17 +9,16 @@ const connectDB = async () => {
 
   const MONGODB_URI =
     process.env.MONGODB_URI ||
-    "mongodb+srv://sriharisivvala216_prog:PortfolioDB2026@cluster0.mongodb.net/stock_portfolio?retryWrites=true&w=majority";
+    "mongodb+srv://userhari:23user2026@cluster0.6uptdwi.mongodb.net/stock_portfolio?retryWrites=true&w=majority&appName=Cluster0";
 
   try {
     const db = await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 8000,
     });
     isConnected = db.connections[0].readyState === 1;
-    console.log(`[Database] MongoDB Connected: ${db.connection.host}`);
+    console.log(`[Database] MongoDB Connected successfully: ${db.connection.host}`);
   } catch (error) {
     console.error(`[Database Error] MongoDB connection failed: ${error.message}`);
-    // Don't crash process in serverless; let endpoints report database status gracefully
   }
 };
 
