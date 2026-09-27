@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Stock Transaction</title>
+  <link rel="stylesheet" href="portfolio.css">
+  <!-- Disable cache -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+</head>
+<body class="input-page">
+  <div class="card tilt-card" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2" style="transform-style: preserve-3d; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: 40px auto; text-align: center;">
+    <h1 style="transform: translateZ(40px);">Add Stock Transaction</h1>
+    <form id="stockInputForm" class="form" style="transform: translateZ(20px);">
+    <div>
+      <label for="company">Company Name</label>
+      <input type="text" id="company" placeholder="Enter company name" required>
+    </div>
+    <div>
+      <label for="symbol">Stock Symbol</label>
+      <input type="text" id="symbol" placeholder="Enter stock symbol" required>
+    </div>
+    <div>
+      <label for="transactionType">Transaction Type</label>
+      <select id="transactionType" required>
+        <option value="BUY">Buy</option>
+        <option value="SELL">Sell</option>
+      </select>
+    </div>
+    <div>
+      <label for="quantity">Quantity</label>
+      <input type="number" id="quantity" placeholder="Enter quantity" step="1" required>
+    </div>
+    <div>
+      <label for="price">Price per Share</label>
+      <input type="number" id="price" placeholder="Enter price per share" step="0.01" required>
+    </div>
+    <button type="submit" class="btn">Add Transaction</button>
+  </form>
+  </div>
+  <div class="card tilt-card" data-tilt data-tilt-max="10" data-tilt-speed="400" style="transform-style: preserve-3d; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: 20px auto; text-align: center;">
+    <button onclick="window.location.href='portfolio.html'" class="go-portfolio-btn" id="goToPortfolio" style="transform: translateZ(20px);">Go to Portfolio</button>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+  <script>
+    VanillaTilt.init(document.querySelectorAll(".tilt-card"));
+  </script>
+</body>
+</html>
+
+

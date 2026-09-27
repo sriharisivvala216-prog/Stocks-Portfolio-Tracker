@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PortfolioPro - Stock Tracker</title>
+  <link rel="stylesheet" href="intro.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo">📈 PortfolioPro</div>
+    <div class="nav-links">
+      <a href="#hero">Home</a>
+      <a href="#features">Features</a>
+      <a href="#cta">Join Us</a>
+    </div>
+  </nav>
+
+  <!-- Section 1: Hero -->
+  <section id="hero" class="section hero-section">
+    <div class="intro-container">
+      <div class="intro-card" style="transform-style: preserve-3d;">
+        <h1 class="hero-title" style="transform: translateZ(50px);">Master Your Investments</h1>
+        <p class="tagline" style="transform: translateZ(30px);">Track your portfolio, analyze real-time market trends, and grow your wealth smarter than ever before.</p>
+        <div class="buttons" style="transform: translateZ(40px);">
+          <a href="index.html" class="btn primary">Login</a>
+          <a href="register.html" class="btn secondary">Register</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Features -->
+  <section id="features" class="section features-section">
+    <h2 class="section-title">Why Choose Us?</h2>
+    <div class="features-grid">
+      <div class="feature-card" style="transform-style: preserve-3d;">
+        <div class="feature-icon" style="transform: translateZ(40px);">📊</div>
+        <h3 style="transform: translateZ(30px);">Real-time Analytics</h3>
+        <p style="transform: translateZ(20px);">Monitor your stock performance with dynamic, interactive charts and gain deep insights.</p>
+      </div>
+      <div class="feature-card" style="transform-style: preserve-3d;">
+        <div class="feature-icon" style="transform: translateZ(40px);">🛡️</div>
+        <h3 style="transform: translateZ(30px);">Secure & Private</h3>
+        <p style="transform: translateZ(20px);">Your financial data is encrypted and securely stored. We prioritize your privacy above all.</p>
+      </div>
+      <div class="feature-card" style="transform-style: preserve-3d;">
+        <div class="feature-icon" style="transform: translateZ(40px);">💡</div>
+        <h3 style="transform: translateZ(30px);">Smart Insights</h3>
+        <p style="transform: translateZ(20px);">Get actionable insights and breakdown of your profit/loss across different companies.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Call to Action -->
+  <section id="cta" class="section cta-section" data-tilt data-tilt-glare data-tilt-max-glare="0.2" data-tilt-scale="1.01">
+    <div class="cta-content">
+      <h2 style="transform: translateZ(30px);">Ready to take control of your financial future?</h2>
+      <p style="transform: translateZ(20px);">Join thousands of investors who use PortfolioPro to maximize their returns.</p>
+      <a href="register.html" class="btn cta-btn" style="transform: translateZ(40px);">Get Started for Free</a>
+    </div>
+    <footer style="transform: translateZ(10px);">
+      <p>&copy; 2026 PortfolioPro. All rights reserved.</p>
+    </footer>
+  </section>
+
+  <!-- Vanilla Tilt for 3D Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+  <script>
+    // Initialize 3D Tilt Effect
+    VanillaTilt.init(document.querySelector(".intro-card"), {
+      max: 15,
+      speed: 400,
+      glare: true,
+      "max-glare": 0.2,
+    });
+
+    VanillaTilt.init(document.querySelectorAll(".feature-card"), {
+      max: 20,
+      speed: 400,
+      glare: true,
+      "max-glare": 0.3,
+    });
+
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>

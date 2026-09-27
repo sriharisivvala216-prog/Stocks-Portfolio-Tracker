@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Portfolio Tracker</title>
+  <link rel="stylesheet" href="login.css">
+  <link rel="icon" href="stockMarket.webp">
+</head>
+<body>
+  <div class="container">
+    <div class="card" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2" style="transform-style: preserve-3d;">
+      <h1 class="logo" style="transform: translateZ(40px);">Portfolio Tracker</h1>
+      <p class="subtitle" style="transform: translateZ(20px);">Create an account to track your investments</p>
+
+   <form id="registerForm" class="form">
+  <input type="text" id="name" placeholder="Full Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button type="submit" class="btn">Sign up</button>
+</form>
+    </div>
+
+    <div class="card switch" data-tilt data-tilt-max="10" data-tilt-speed="400" style="transform-style: preserve-3d;">
+      <p style="transform: translateZ(20px);">Have an account? <a href="index.html" id="goLogin">Log in</a></p>
+    </div>
+
+  </div>
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+  <script>
+    VanillaTilt.init(document.querySelectorAll(".card"));
+  </script>
+</body>
+</html>

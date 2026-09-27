@@ -1,0 +1,161 @@
+/* ===================== Global Reset ===================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===================== Body ===================== */
+body {
+  background: url('https://www.shutterstock.com/image-vector/economy-situation-concept-financial-business-600nw-2311743545.jpg') no-repeat center center/cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  color: #333; /* Dark text for light mode */
+}
+
+/* Remove dark overlay */
+body::before {
+  display: none;
+}
+
+/* ===================== Container ===================== */
+.container {
+  width: 400px;
+  max-width: 95%;
+  z-index: 1;
+}
+
+/* ===================== Card ===================== */
+.card {
+  background: #fff; /* White card */
+  padding: 50px 35px;
+  border-radius: 20px;
+  text-align: center;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ===================== Logo & Text ===================== */
+.logo {
+  font-size: 2.5rem;
+  color: #222;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #555;
+  margin-bottom: 25px;
+  font-size: 1rem;
+}
+
+/* ===================== Form ===================== */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form input {
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fff;
+  color: #333;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form input::placeholder {
+  color: #888;
+}
+
+.form input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+}
+
+/* ===================== Buttons ===================== */
+.btn {
+  margin-top: 10px;
+  padding: 14px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.btn:hover {
+  background: #0056b3;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+/* ===================== Links ===================== */
+.forgot {
+  display: block;
+  margin-top: 12px;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+
+.forgot:hover {
+  color: #0056b3;
+}
+
+.switch {
+  padding: 15px 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.switch a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.switch a:hover {
+  color: #0056b3;
+}
+
+/* ===================== Terms ===================== */
+.terms {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+/* ===================== Responsive ===================== */
+@media (max-width: 480px) {
+  .card {
+    padding: 35px 20px;
+  }
+
+  .logo {
+    font-size: 2rem;
+  }
+
+  .form input, .btn {
+    padding: 12px;
+  }
+}
