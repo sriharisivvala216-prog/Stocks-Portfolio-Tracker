@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: stocks-portfolio-backend
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_VERSION
+        value: 20
+      - key: FINNHUB_API_KEY
+        value: d302t41r01qnmrscnpa0d302t41r01qnmrscnpag
+      - key: JWT_SECRET
+        value: 71fbc7fd1de400996382ccf5c8038da93d31896d158e86cc6a75a47fec5da333a9405d68bbc80aefe5cf624a4dd5a5697dc810e45d23b3362afb2048dd065a23
+      - key: MONGODB_URI
+        sync: false
