@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const storage = require("../services/storage");
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -10,7 +10,7 @@ const JWT_SECRET =
 // @route   POST /api/auth/register or /register
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Full name, email, and password are required" });
@@ -23,20 +23,20 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
-    const existingUser = await User.findOne({ email: cleanEmail });
+    const existingUser = await storage.findUserByEmail(cleanEmail);
     if (existingUser) {
       return res.status(400).json({ message: "An account with this email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
+    const newUser = await storage.createUser({
       name: cleanName,
       email: cleanEmail,
       password: hashedPassword,
     });
 
     const token = jwt.sign(
-      { id: newUser._id.toString(), name: newUser.name, email: newUser.email },
+      { id: (newUser._id || newUser.id).toString(), name: newUser.name, email: newUser.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -45,7 +45,7 @@ const register = async (req, res) => {
       message: "User registered successfully",
       token,
       user: {
-        id: newUser._id.toString(),
+        id: (newUser._id || newUser.id).toString(),
         name: newUser.name,
         email: newUser.email,
       },
@@ -67,10 +67,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Email/Username and password are required" });
     }
 
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { name: new RegExp(`^${identifier}$`, "i") }],
-    });
-
+    const user = await storage.findUserByIdentifier(identifier);
     if (!user) {
       return res.status(400).json({ message: "User not found. Please register first." });
     }
@@ -81,7 +78,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id.toString(), name: user.name, email: user.email },
+      { id: (user._id || user.id).toString(), name: user.name, email: user.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -90,7 +87,7 @@ const login = async (req, res) => {
       message: "Successfully logged in!",
       token,
       user: {
-        id: user._id.toString(),
+        id: (user._id || user.id).toString(),
         name: user.name,
         email: user.email,
       },
@@ -105,7 +102,7 @@ const login = async (req, res) => {
 // @route   GET /api/auth/me
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await storage.findUserById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

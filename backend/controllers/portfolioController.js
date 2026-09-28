@@ -1,5 +1,5 @@
 const axios = require("axios");
-const Portfolio = require("../models/Portfolio");
+const storage = require("../services/storage");
 
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY || "d302t41r01qnmrscnpa0d302t41r01qnmrscnpag";
 
@@ -32,7 +32,7 @@ async function getLivePrice(symbol, defaultPrice) {
 // @route   POST /api/portfolio or /portfolio
 const addTransaction = async (req, res) => {
   try {
-    const { company_symbol, company_name, transaction_type, quantity, price } = req.body;
+    const { company_symbol, company_name, transaction_type, quantity, price } = req.body || {};
 
     if (!company_symbol || !company_name || !transaction_type || quantity === undefined || price === undefined) {
       return res.status(400).json({ message: "All transaction fields are required" });
@@ -48,20 +48,19 @@ const addTransaction = async (req, res) => {
       return res.status(400).json({ message: "Quantity and price must be positive numbers" });
     }
 
-    const transaction = await Portfolio.create({
+    const transaction = await storage.createPortfolio({
       userId: req.user.id,
       companySymbol: cleanSymbol,
       companyName: cleanName,
       transactionType: cleanType,
       quantity: cleanQty,
       price: cleanPrice,
-      date: new Date(),
     });
 
     res.status(201).json({
       message: "Stock transaction added successfully",
       transaction: {
-        id: transaction._id.toString(),
+        id: transaction._id || transaction.id,
         company_symbol: transaction.companySymbol,
         company_name: transaction.companyName,
         transaction_type: transaction.transactionType,
@@ -72,7 +71,7 @@ const addTransaction = async (req, res) => {
     });
   } catch (error) {
     console.error("Add transaction error:", error);
-    res.status(500).json({ message: "Error recording transaction to MongoDB" });
+    res.status(500).json({ message: "Error recording transaction" });
   }
 };
 
@@ -80,17 +79,7 @@ const addTransaction = async (req, res) => {
 // @route   GET /api/portfolio or /portfolio
 const getPortfolio = async (req, res) => {
   try {
-    const records = await Portfolio.find({ userId: req.user.id }).sort({ date: -1 });
-
-    const formattedItems = records.map((r) => ({
-      id: r._id.toString(),
-      company_name: r.companyName,
-      company_symbol: r.companySymbol,
-      transaction_type: r.transactionType,
-      quantity: Number(r.quantity),
-      price: Number(r.price),
-      date: r.date,
-    }));
+    const formattedItems = await storage.getPortfolio(req.user.id);
 
     const enrichedPortfolio = await Promise.all(
       formattedItems.map(async (stock) => {
@@ -111,7 +100,7 @@ const getPortfolio = async (req, res) => {
     res.json(enrichedPortfolio);
   } catch (error) {
     console.error("Get portfolio error:", error);
-    res.status(500).json({ message: "Error fetching portfolio from MongoDB" });
+    res.status(500).json({ message: "Error fetching portfolio" });
   }
 };
 
@@ -121,19 +110,16 @@ const deleteTransaction = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await Portfolio.findOneAndDelete({
-      _id: id,
-      userId: req.user.id,
-    });
+    const success = await storage.deletePortfolio(id, req.user.id);
 
-    if (!result) {
+    if (!success) {
       return res.status(404).json({ message: "Transaction not found or unauthorized" });
     }
 
     res.json({ message: "Stock transaction deleted successfully" });
   } catch (error) {
     console.error("Delete transaction error:", error);
-    res.status(500).json({ message: "Error deleting transaction from MongoDB" });
+    res.status(500).json({ message: "Error deleting transaction" });
   }
 };
 
