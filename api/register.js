@@ -1,7 +1,7 @@
 const connectDB = require("../backend/config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../backend/models/User");
+const storage = require("../backend/services/storage");
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -39,20 +39,20 @@ module.exports = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
-    const existingUser = await User.findOne({ email: cleanEmail });
+    const existingUser = await storage.findUserByEmail(cleanEmail);
     if (existingUser) {
       return res.status(400).json({ message: "An account with this email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
+    const newUser = await storage.createUser({
       name: cleanName,
       email: cleanEmail,
       password: hashedPassword,
     });
 
     const token = jwt.sign(
-      { id: newUser._id.toString(), name: newUser.name, email: newUser.email },
+      { id: (newUser._id || newUser.id).toString(), name: newUser.name, email: newUser.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -61,7 +61,7 @@ module.exports = async (req, res) => {
       message: "User registered successfully",
       token,
       user: {
-        id: newUser._id.toString(),
+        id: (newUser._id || newUser.id).toString(),
         name: newUser.name,
         email: newUser.email,
       },

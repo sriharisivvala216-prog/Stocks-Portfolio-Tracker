@@ -1,7 +1,7 @@
 const connectDB = require("../backend/config/db");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
-const Portfolio = require("../backend/models/Portfolio");
+const storage = require("../backend/services/storage");
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -81,20 +81,19 @@ module.exports = async (req, res) => {
         return res.status(400).json({ message: "Quantity and price must be positive numbers" });
       }
 
-      const transaction = await Portfolio.create({
+      const transaction = await storage.createPortfolio({
         userId: user.id,
         companySymbol: cleanSymbol,
         companyName: cleanName,
         transactionType: cleanType,
         quantity: cleanQty,
         price: cleanPrice,
-        date: new Date(),
       });
 
       return res.status(201).json({
         message: "Stock transaction added successfully",
         transaction: {
-          id: transaction._id.toString(),
+          id: transaction._id || transaction.id,
           company_symbol: transaction.companySymbol,
           company_name: transaction.companyName,
           transaction_type: transaction.transactionType,
@@ -112,17 +111,7 @@ module.exports = async (req, res) => {
   // GET: Fetch user portfolio
   if (req.method === "GET") {
     try {
-      const records = await Portfolio.find({ userId: user.id }).sort({ date: -1 });
-
-      const formattedItems = records.map((r) => ({
-        id: r._id.toString(),
-        company_name: r.companyName,
-        company_symbol: r.companySymbol,
-        transaction_type: r.transactionType,
-        quantity: Number(r.quantity),
-        price: Number(r.price),
-        date: r.date,
-      }));
+      const formattedItems = await storage.getPortfolio(user.id);
 
       const enrichedPortfolio = await Promise.all(
         formattedItems.map(async (stock) => {
@@ -155,12 +144,9 @@ module.exports = async (req, res) => {
         return res.status(400).json({ message: "Transaction ID is required for deletion" });
       }
 
-      const result = await Portfolio.findOneAndDelete({
-        _id: id,
-        userId: user.id,
-      });
+      const success = await storage.deletePortfolio(id, user.id);
 
-      if (!result) {
+      if (!success) {
         return res.status(404).json({ message: "Transaction not found or unauthorized" });
       }
 
