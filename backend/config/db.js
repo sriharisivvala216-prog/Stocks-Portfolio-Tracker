@@ -1,54 +1,82 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
+
+// Ensure public DNS resolver is used for MongoDB Atlas SRV lookup
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (e) {
+  // Ignored if custom DNS cannot be configured in environment
+}
 
 let cached = global.mongoose;
 
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null, lastAttempt: 0 };
 }
 
 const connectDB = async () => {
+  // 1. If already connected, return cached connection immediately
   if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
+  // 2. If connection is already in progress, wait for the existing promise
+  if (cached.promise) {
+    try {
+      return await cached.promise;
+    } catch {
+      return null;
+    }
+  }
+
+  // 3. Cooldown: do not retry within 20 seconds of a failure to avoid log flooding
+  const now = Date.now();
+  if (cached.lastAttempt && now - cached.lastAttempt < 20000) {
+    return null;
+  }
+  cached.lastAttempt = now;
+
   const primaryURI =
     process.env.MONGODB_URI ||
     "mongodb+srv://sriharisivvala216_db_user:sri12345@cluster0.sek0ysr.mongodb.net/?appName=Cluster0";
-  const localURI = "mongodb://127.0.0.1:27017/stock_portfolio";
 
-  if (!cached.promise) {
-    const opts = {
-      serverSelectionTimeoutMS: 8000,
-    };
+  const opts = {
+    serverSelectionTimeoutMS: 5000,
+  };
 
-    cached.promise = mongoose
-      .connect(primaryURI, opts)
-      .then((mongooseInstance) => {
-        console.log(`[Database] MongoDB Connected successfully: ${mongooseInstance.connection.host}`);
-        return mongooseInstance;
-      })
-      .catch(async (error) => {
-        console.error(`[Database Error] Primary MongoDB connection failed: ${error.message}`);
-        cached.promise = null;
-        if (primaryURI !== localURI) {
-          console.log(`[Database] Attempting fallback to local MongoDB (${localURI})...`);
-          try {
-            return await mongoose.connect(localURI, { serverSelectionTimeoutMS: 3000 });
-          } catch (localErr) {
-            console.error(`[Database Error] Local MongoDB fallback failed: ${localErr.message}`);
-          }
+  cached.promise = (async () => {
+    try {
+      const conn = await mongoose.connect(primaryURI, opts);
+      console.log(`[Database] MongoDB Atlas connected successfully: ${conn.connection.host}`);
+      cached.conn = conn;
+      cached.promise = null;
+      return conn;
+    } catch (error) {
+      console.error(`[Database Error] MongoDB Atlas connection failed: ${error.message}`);
+      cached.promise = null;
+      cached.conn = null;
+
+      // Only attempt local fallback if running strictly in local development environment
+      const isCloudEnv = !!(process.env.RENDER || process.env.VERCEL || process.env.NODE_ENV === "production");
+      if (!isCloudEnv) {
+        try {
+          await mongoose.disconnect().catch(() => {});
+          console.log("[Database] Attempting local MongoDB fallback (mongodb://127.0.0.1:27017/stock_portfolio)...");
+          const localConn = await mongoose.connect("mongodb://127.0.0.1:27017/stock_portfolio", {
+            serverSelectionTimeoutMS: 2000,
+          });
+          console.log(`[Database] Local MongoDB connected: ${localConn.connection.host}`);
+          cached.conn = localConn;
+          return localConn;
+        } catch (localErr) {
+          console.warn(`[Database] Local MongoDB fallback unavailable: ${localErr.message}`);
         }
-        throw error;
-      });
-  }
+      }
+      return null;
+    }
+  })();
 
-  try {
-    cached.conn = await cached.promise;
-    return cached.conn;
-  } catch (e) {
-    cached.promise = null;
-    console.error(`[Database Error] Connection threw error: ${e.message}`);
-  }
+  return await cached.promise;
 };
 
 module.exports = connectDB;

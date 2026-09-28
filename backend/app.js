@@ -15,15 +15,22 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ensure DB is connected for serverless invocations
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-  } catch (err) {
-    console.error("[Database] Pre-request connect error:", err.message);
-  }
-  next();
+// Connect DB at startup
+connectDB().catch((err) => {
+  console.warn("[Database] Initial connection:", err.message);
 });
+
+// Serverless-only on-demand connect
+if (process.env.VERCEL) {
+  app.use(async (req, res, next) => {
+    try {
+      await connectDB();
+    } catch (err) {
+      // Handled by db cooldown
+    }
+    next();
+  });
+}
 
 // ---------------------- Health Check ----------------------
 app.get("/api/health", (req, res) => {
