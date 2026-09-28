@@ -31,11 +31,18 @@ export default function Register() {
       navigate('/login');
     } catch (err) {
       console.error('Registration error:', err);
-      const errorMessage =
-        err.response?.data?.message ||
-        (err.code === 'ERR_NETWORK'
-          ? 'Cannot connect to backend server. Make sure the server on port 5000 is running.'
-          : 'Registration failed. Email might already be registered.');
+      let errorMessage = 'Registration failed. Please try again.';
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (typeof err.response?.data === 'string' && err.response.data.includes('<!DOCTYPE html>')) {
+        errorMessage = 'Backend API endpoint not reachable. Please verify VITE_API_BASE_URL is configured in your deployment settings.';
+      } else if (err.code === 'ERR_NETWORK') {
+        errorMessage = 'Cannot connect to backend server. Make sure the server on port 5000 is running.';
+      } else if (err.response?.status === 404 || err.response?.status === 405) {
+        errorMessage = 'API endpoint not found. Backend server may not be deployed or connected.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
       toast.error(errorMessage);
     } finally {
       setLoading(false);

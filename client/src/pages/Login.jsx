@@ -46,8 +46,14 @@ export default function Login() {
       let message = 'Invalid credentials. Please check your username/email and password.';
       if (err.response?.data?.message) {
         message = err.response.data.message;
+      } else if (typeof err.response?.data === 'string' && err.response.data.includes('<!DOCTYPE html>')) {
+        message = 'Backend API endpoint not reachable. Please verify VITE_API_BASE_URL is configured in your deployment settings.';
       } else if (err.code === 'ERR_NETWORK') {
-        message = 'Cannot connect to backend server. Make sure port 5000 is active.';
+        message = 'Cannot connect to backend server. Make sure the backend server on port 5000 is active.';
+      } else if (err.response?.status === 404 || err.response?.status === 405) {
+        message = 'API endpoint not found. Backend server may not be deployed or connected.';
+      } else if (err.message) {
+        message = err.message;
       }
       setErrorMessage(message);
       toast.error(message);

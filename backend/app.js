@@ -10,13 +10,20 @@ const portfolioRoutes = require("./routes/portfolioRoutes");
 
 const app = express();
 
-// Initialize MongoDB Connection
-connectDB();
-
 // ---------------------- Middleware ----------------------
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Ensure DB is connected for serverless invocations
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error("[Database] Pre-request connect error:", err.message);
+  }
+  next();
+});
 
 // ---------------------- Health Check ----------------------
 app.get("/api/health", (req, res) => {
@@ -38,22 +45,28 @@ app.get("/api/health", (req, res) => {
 });
 
 // ---------------------- API Endpoints ----------------------
-// Structured modular routes
+// Modular routes with /api prefixes
 app.use("/api/auth", authRoutes);
 app.use("/api/portfolio", portfolioRoutes);
+app.use("/api", authRoutes);
+app.use("/api", portfolioRoutes);
 
 // Direct compatibility alias routes (supporting `/login`, `/register`, `/portfolio`)
 app.use("/", authRoutes);
 app.use("/portfolio", portfolioRoutes);
 
-// ---------------------- Serve Client Frontend ----------------------
+// ---------------------- Serve Client Frontend (for monolith Express mode) ----------------------
 const clientDistPath = path.join(__dirname, "..", "client", "dist");
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
   app.use((req, res, next) => {
     if (req.method !== "GET") return next();
-    // If request path starts with /api or is an API route, pass to next error handler
-    if (req.path.startsWith("/api") || req.path === "/login" || req.path === "/register" || req.path.startsWith("/portfolio")) {
+    if (
+      req.path.startsWith("/api") ||
+      req.path === "/login" ||
+      req.path === "/register" ||
+      req.path.startsWith("/portfolio")
+    ) {
       return next();
     }
     res.sendFile(path.join(clientDistPath, "index.html"));
