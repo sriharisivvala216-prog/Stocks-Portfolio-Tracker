@@ -50,7 +50,8 @@ app.use("/portfolio", portfolioRoutes);
 const clientDistPath = path.join(__dirname, "..", "client", "dist");
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
-  app.get("*", (req, res, next) => {
+  app.use((req, res, next) => {
+    if (req.method !== "GET") return next();
     // If request path starts with /api or is an API route, pass to next error handler
     if (req.path.startsWith("/api") || req.path === "/login" || req.path === "/register" || req.path.startsWith("/portfolio")) {
       return next();
