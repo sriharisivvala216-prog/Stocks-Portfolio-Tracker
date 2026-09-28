@@ -13,7 +13,7 @@ const connectDB = async () => {
 
   const primaryURI =
     process.env.MONGODB_URI ||
-    "mongodb+srv://sriharisivvala216_db_user:sri12345@cluster0.sek0ysr.mongodb.net/stock_portfolio?retryWrites=true&w=majority&appName=Cluster0";
+    "mongodb+srv://sriharisivvala216_db_user:sri12345@cluster0.sek0ysr.mongodb.net/?appName=Cluster0";
   const localURI = "mongodb://127.0.0.1:27017/stock_portfolio";
 
   if (!cached.promise) {
