@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let pieChartInstance, barChartInstance, lineChartInstance;
 
+  // Compute dynamic API base URL so it works seamlessly on Render, localhost, or live server
+  const API_BASE = (window.location.protocol === "http:" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && window.location.port !== "5000")
+    ? "http://localhost:5000"
+    : "";
+
   // ---------------- LOGIN ----------------
   if (loginForm) {
     loginForm.addEventListener("submit", async e => {
@@ -17,8 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("password").value.trim();
       if (!email || !password) return alert("Please enter email and password");
 
+      const submitBtn = loginForm.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Logging in...";
+      }
+
       try {
-        const res = await fetch("http://localhost:5000/login", {
+        const res = await fetch(`${API_BASE}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
@@ -26,12 +37,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
         if (res.ok) {
           localStorage.setItem("token", data.token);
+          if (data.user && data.user.name) {
+            localStorage.setItem("username", data.user.name);
+          }
           window.location.href = "input.html"; 
         } else {
-          alert(data.message);
+          alert(data.message || "Login failed");
         }
-      } catch {
-        alert("Server error");
+      } catch (err) {
+        console.error("Login fetch error:", err);
+        alert("Cannot connect to server. Please try again.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Log in";
+        }
       }
     });
   }
@@ -45,8 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("password").value.trim();
       if (!name || !email || !password) return alert("All fields are required");
 
+      const submitBtn = registerForm.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Creating account...";
+      }
+
       try {
-        const res = await fetch("http://localhost:5000/register", {
+        const res = await fetch(`${API_BASE}/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, password })
@@ -56,10 +82,16 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Registered successfully! Please login.");
           window.location.href = "index.html";
         } else {
-          alert(data.message);
+          alert(data.message || "Registration failed");
         }
-      } catch {
-        alert("Server error");
+      } catch (err) {
+        console.error("Register fetch error:", err);
+        alert("Cannot connect to server. Please try again.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Sign up";
+        }
       }
     });
   }
@@ -81,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return alert("All fields are required");
 
       try {
-        const res = await fetch("http://localhost:5000/portfolio", {
+        const res = await fetch(`${API_BASE}/portfolio`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -106,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!token) return alert("Please login first");
 
     try {
-      const res = await fetch("http://localhost:5000/portfolio", {
+      const res = await fetch(`${API_BASE}/portfolio`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const portfolio = await res.json();
@@ -142,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
           btn.addEventListener("click", async () => {
             const id = btn.dataset.id;
             if (confirm("Are you sure to delete this transaction?")) {
-              await fetch(`http://localhost:5000/portfolio/${id}`, {
+              await fetch(`${API_BASE}/portfolio/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
               });

@@ -58,22 +58,21 @@ app.use("/api/portfolio", portfolioRoutes);
 app.use("/api", authRoutes);
 app.use("/api", portfolioRoutes);
 
-// Direct compatibility alias routes (supporting `/login`, `/register`, `/portfolio`)
+// Direct compatibility alias routes for POST/DELETE requests
 app.use("/", authRoutes);
-app.use("/portfolio", portfolioRoutes);
+app.use("/portfolio", (req, res, next) => {
+  if (req.method === "GET" && req.accepts("html")) {
+    return next();
+  }
+  return portfolioRoutes(req, res, next);
+});
 
 // ---------------------- Serve Client Frontend (for monolith Express mode) ----------------------
 const clientDistPath = path.join(__dirname, "..", "client", "dist");
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
   app.use((req, res, next) => {
-    if (req.method !== "GET") return next();
-    if (
-      req.path.startsWith("/api") ||
-      req.path === "/login" ||
-      req.path === "/register" ||
-      req.path.startsWith("/portfolio")
-    ) {
+    if (req.method !== "GET" || req.path.startsWith("/api")) {
       return next();
     }
     res.sendFile(path.join(clientDistPath, "index.html"));
@@ -81,6 +80,26 @@ if (fs.existsSync(clientDistPath)) {
 } else {
   const rootPath = path.join(__dirname, "..");
   app.use(express.static(rootPath));
+
+  app.get(["/login", "/signin"], (req, res) => {
+    res.sendFile(path.join(rootPath, "index.html"));
+  });
+
+  app.get(["/register", "/signup"], (req, res) => {
+    res.sendFile(path.join(rootPath, "register.html"));
+  });
+
+  app.get(["/portfolio"], (req, res) => {
+    res.sendFile(path.join(rootPath, "portfolio.html"));
+  });
+
+  app.get(["/input"], (req, res) => {
+    res.sendFile(path.join(rootPath, "input.html"));
+  });
+
+  app.get(["/intro", "/home"], (req, res) => {
+    res.sendFile(path.join(rootPath, "intro.html"));
+  });
 }
 
 // ---------------------- Global Error Handler ----------------------
