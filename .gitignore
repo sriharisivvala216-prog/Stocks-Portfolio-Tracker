@@ -19,6 +19,8 @@ build/
 *.sqlite
 *.sqlite3
 *.db
+backend/data/
+data/
 
 # Logs
 npm-debug.log*
