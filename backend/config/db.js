@@ -38,10 +38,11 @@ const connectDB = async () => {
 
   const primaryURI =
     process.env.MONGODB_URI ||
-    "mongodb+srv://sriharisivvala216_db_user:sri12345@cluster0.sek0ysr.mongodb.net/stock_portfolio?authSource=admin&retryWrites=true&w=majority&appName=Cluster0";
+    "mongodb+srv://sriharisivvala216_db_user:sri12345@cluster0.sek0ysr.mongodb.net/?appName=Cluster0";
 
   const opts = {
     serverSelectionTimeoutMS: 5000,
+    authSource: "admin",
   };
 
   cached.promise = (async () => {
