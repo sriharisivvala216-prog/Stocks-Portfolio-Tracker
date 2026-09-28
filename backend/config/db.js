@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 const dns = require("dns");
 
-// Ensure public DNS resolver is used for MongoDB Atlas SRV lookup
-try {
-  dns.setServers(["8.8.8.8", "1.1.1.1"]);
-} catch (e) {
-  // Ignored if custom DNS cannot be configured in environment
+// Ensure public DNS resolver is used for MongoDB Atlas SRV lookup in non-serverless environments
+if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1"]);
+  } catch (e) {
+    // Ignored if custom DNS cannot be configured in environment
+  }
 }
 
 let cached = global.mongoose;

@@ -1,7 +1,7 @@
 const connectDB = require("../backend/config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../backend/models/User");
+const storage = require("../backend/services/storage");
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -33,10 +33,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ message: "Email/Username and password are required" });
     }
 
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { name: new RegExp(`^${identifier}$`, "i") }],
-    });
-
+    const user = await storage.findUserByIdentifier(identifier);
     if (!user) {
       return res.status(400).json({ message: "User not found. Please register first." });
     }
@@ -47,7 +44,7 @@ module.exports = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id.toString(), name: user.name, email: user.email },
+      { id: (user._id || user.id).toString(), name: user.name, email: user.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -56,7 +53,7 @@ module.exports = async (req, res) => {
       message: "Successfully logged in!",
       token,
       user: {
-        id: user._id.toString(),
+        id: (user._id || user.id).toString(),
         name: user.name,
         email: user.email,
       },
