@@ -13,7 +13,11 @@ const getBaseUrl = () => {
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return 'http://localhost:5000';
     }
-    return '';
+    if (hostname.includes('onrender.com')) {
+      return '';
+    }
+    // Default for Vercel or any remote frontend: point directly to live Render backend
+    return 'https://stocks-portfolio-tracker-7gnq.onrender.com';
   }
   return 'http://localhost:5000';
 };
